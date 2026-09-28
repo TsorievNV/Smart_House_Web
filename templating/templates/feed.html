@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Лента — SMART TRAFFIC{% endblock %}
+
+{% block content %}
+{% if device %}
+<div class="feed-page">
+    <div class="video-container">
+        <video class="feed-video" autoplay muted loop playsinline controls
+               poster="{{ device.image_url or '/static/img/default.jpg' }}">
+            <source src="{{ device.video_url or '/static/video/default.mp4' }}" type="video/mp4"
+                    onerror="if (!this.parentElement.dataset.fallback) { this.parentElement.dataset.fallback='1'; this.src='/static/video/default.mp4'; this.parentElement.load(); }">
+        </video>
+        <img src="{{ device.image_url or '/static/img/default.jpg' }}" hidden alt=""
+             onerror="this.onerror=null;document.querySelector('.feed-video').poster='/static/img/default.jpg'">
+
+        <div class="overlay">
+            <div class="overlay-bottom">
+                <div class="type-label">{{ device.model or device.type_label }}</div>
+
+                <h1 class="device-title">{{ device.title }}</h1>
+
+                <div class="stats-row">
+                    <div>
+                        <span class="stat-label">E(X)</span>
+                        <span class="stat-value accent">
+                            {{ device.traffic_mean }} ГБ
+                        </span>
+                    </div>
+
+                    <div>
+                        <span class="stat-label">D(X)</span>
+                        <span class="stat-value">
+                            {{ device.traffic_variance }} ГБ²
+                        </span>
+                    </div>
+                </div>
+
+                <p class="device-desc">{{ device.description }}</p>
+            </div>
+
+            <div class="overlay-right">
+                <div class="like-block">
+                    <div class="like-icon">♥</div>
+                    <span class="like-count">{{ device.likes_count }}</span>
+                </div>
+
+                <a href="/feed?id={{ device.id }}&next=true" class="btn-next" title="Следующий">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 5l5 5-5 5"/>
+                        <path d="M20 10H10a5 5 0 0 0-5 5v2"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty">Нет опубликованных устройств</div>
+{% endif %}
+{% endblock %}

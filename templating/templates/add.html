@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Добавление — SMART TRAFFIC{% endblock %}
+
+{% block content %}
+<div class="page add-page">
+    <div class="draft-badge">ЧЕРНОВИК</div>
+
+    <form class="add-form" method="post" action="{{ '/device/' ~ device.id ~ '/publish' if device else '/add' }}">
+        <section class="form-section">
+            <h3 class="section-label">МЕДИА</h3>
+
+            <div class="upload-field">
+                <span class="field-label">ИЗОБРАЖЕНИЕ УСТРОЙСТВА</span>
+                <label class="upload-box upload-box-img">
+                <img class="media-preview" src="{{ device.image_url if device and device.image_url else '/static/img/default.jpg' }}" onerror="this.onerror=null;this.src='/static/img/default.jpg'" alt="Изображение устройства">
+                    <input type="file" accept="image/*" class="media-picker" aria-label="Выбрать изображение">
+                    <span class="upload-icon" aria-hidden="true">
+                        <svg viewBox="0 0 48 48">
+                            <rect x="6" y="6" width="36" height="36" rx="4"></rect>
+                            <circle cx="17" cy="17" r="3"></circle>
+                            <path d="M6 35L16 25L23 32L29 26L42 39"></path>
+                        </svg>
+                    </span>
+                    <span class="upload-text">Добавить изображение</span>
+                </label>
+            </div>
+
+            <div class="upload-field">
+                <span class="field-label">ВИДЕО УСТРОЙСТВА</span>
+                <label class="upload-box upload-box-video">
+                <video class="media-preview" autoplay loop muted playsinline preload="metadata" aria-hidden="true" poster="/static/img/default.jpg">
+                    <source src="{{ device.video_url if device and device.video_url else '/static/video/default.mp4' }}" type="video/mp4"
+                        onerror="if (!this.parentElement.dataset.fallback) { this.parentElement.dataset.fallback='1'; this.src='/static/video/default.mp4'; this.parentElement.load(); }">
+                </video>
+                    <input type="file" accept="video/*" class="media-picker" aria-label="Выбрать видео">
+                    <span class="upload-icon" aria-hidden="true">
+                        <svg viewBox="0 0 48 48">
+                            <rect x="5" y="12" width="28" height="24" rx="4"></rect>
+                            <path d="M33 20L43 14V34L33 28V20Z"></path>
+                        </svg>
+                    </span>
+                    <span class="upload-text">Добавить короткое видео</span>
+                </label>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h3 class="section-label">ИНФОРМАЦИЯ</h3>
+
+            <label>НАЗВАНИЕ УСТРОЙСТВА
+                <input type="text" name="title" maxlength="255" required placeholder="Введите название" value="{{ device.title if device else '' }}">
+            </label>
+
+            <label>МОДЕЛЬ
+                <input type="text" name="model" maxlength="100" placeholder="Введите модель" value="{{ device.model or '' if device else '' }}">
+            </label>
+
+            {% if device %}
+            <label>ОПИСАНИЕ
+                <textarea name="description" maxlength="500" required placeholder="Кратко опишите устройство" rows="3">{{ device.description or '' }}</textarea>
+            </label>
+        </section>
+
+        <section class="form-section">
+            <h3 class="section-label">ПАРАМЕТРЫ ТРАФИКА</h3>
+
+            <label>МАТЕМАТИЧЕСКОЕ ОЖИДАНИЕ E(X), ГБ/МЕС
+                <input type="number" step="0.01" name="traffic_mean" min="0" required placeholder="15" value="{{ device.traffic_mean if device.traffic_mean is not none else '' }}">
+            </label>
+
+            <label>ДИСПЕРСИЯ D(X), ГБ²
+                <input type="number" step="0.01" name="traffic_variance" min="0" required placeholder="4.2" value="{{ device.traffic_variance if device.traffic_variance is not none else '' }}">
+            </label>
+        {% endif %}
+        </section>
+        <button type="submit" class="btn-apply">{{ 'Опубликовать' if device else 'Далее' }}</button>
+    </form>
+</div>
+<script>
+// У полей файлов нет name: файлы и их имена не передаются на сервер.
+document.querySelectorAll('.media-picker').forEach(input => {
+    input.addEventListener('change', () => {
+        input.parentElement.querySelector('.upload-text').textContent = input.files[0]?.name || 'Выбрать файл';
+    });
+});
+</script>
+{% endblock %}
