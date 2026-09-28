@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}SMART TRAFFIC{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app">
+        {% block content %}{% endblock %}
+
+        <nav class="tabbar">
+            <a href="/feed" class="tab {% if active == 'feed' %}active{% endif %}">
+                <span class="tab-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </span>
+                <span class="tab-label">ЛЕНТА</span>
+            </a>
+            <a href="/add" class="tab {% if active == 'add' %}active{% endif %}">
+                <span class="tab-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </span>
+                <span class="tab-label">ДОБАВЛЕНИЕ</span>
+            </a>
+            <a href="/grid" class="tab {% if active == 'grid' %}active{% endif %}">
+                <span class="tab-icon">
+                    <!-- как в Implement task (2) -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
+                </span>
+                <span class="tab-label">ПЛИТКА</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

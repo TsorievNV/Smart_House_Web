@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Плитка — SMART TRAFFIC{% endblock %}
+
+{% block content %}
+<div class="page grid-page">
+    <form class="filter-form" method="get" action="/grid">
+        <div class="filter-card">
+            <div class="filter-header">
+                <span class="filter-label">МАТЕМАТИЧЕСКОЕ ОЖИДАНИЕ</span>
+                <span class="filter-value accent" id="mean-display">
+                    {% if mean_max is not none %}{{ mean_max }} ГБ{% else %}35 ГБ{% endif %}
+                </span>
+            </div>
+
+            <input
+                type="range"
+                name="mean_max"
+                min="0"
+                max="35"
+                step="0.5"
+                value="{{ mean_max if mean_max is not none else 35 }}"
+                class="filter-range"
+            >
+
+            <div class="filter-scale">
+                <span>0 ГБ</span>
+                <span>35 ГБ</span>
+            </div>
+
+            <button type="submit" class="btn-apply">ПРИМЕНИТЬ</button>
+        </div>
+    </form>
+
+    <div class="cards-grid">
+        {% for card in cards %}
+        <a href="/feed?id={{ card.id }}" class="card">
+            <div class="card-img-wrap">
+                <img src="{{ card.image_url }}" alt="{{ card.title }}">
+            </div>
+            <div class="card-body">
+                <div class="type-label">{{ card.type_label }}</div>
+                <h3 class="card-title">{{ card.title }}</h3>
+                <div class="card-mean accent">E(X) ≈ {{ card.traffic_mean }} ГБ</div>
+                <div class="card-var">D(X) ≈ {{ card.traffic_variance }}</div>
+                <div class="card-likes">♥ {{ card.likes_count }}</div>
+            </div>
+        </a>
+        {% else %}
+        <p class="empty">Нет устройств</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
