@@ -1,0 +1,28 @@
+{% extends "smart_devices_base.html" %}
+{% block title %}Добавление — SMART TRAFFIC{% endblock %}
+{% block content %}
+<div class="page add-page">
+<h1>Добавление устройства</h1>
+{% if device %}
+<h2>{{ device.title }}</h2><p>{{ device.description }}</p>
+<p>{{ device.model or device.type_label }} · E(X): {{ device.traffic_mean }} · D(X): {{ device.traffic_variance }}</p>
+<img src="{{ media_url(device.image_key) or '/static/img/default.jpg' }}" alt="Изображение" style="max-width:100%">
+<video src="{{ media_url(device.video_key) or '/static/video/default.mp4' }}" controls style="max-width:100%"></video>
+<button class="btn-apply" data-publish="{{ device.id }}">Опубликовать</button>
+<button class="btn-apply btn-delete" data-delete="{{ device.id }}">Удалить</button>
+{% else %}
+<form id="create-smart-device" class="add-form">
+<label>Название<input name="title" required maxlength="255"></label>
+<label>Тип<input name="type_label" value="УМНОЕ УСТРОЙСТВО" required maxlength="100"></label>
+<label>Модель<input name="model" maxlength="100"></label>
+<label>Описание<textarea name="description" required maxlength="500"></textarea></label>
+<label>E(X), ГБ/мес<input name="traffic_mean" type="number" min="0" step="any" required></label>
+<label>D(X), ГБ²<input name="traffic_variance" type="number" min="0" step="any" required></label>
+<label>Изображение (JPEG, PNG, WebP; до 10 МБ)<input name="image" type="file" accept="image/jpeg,image/png,image/webp" required></label>
+<label>Короткое видео (MP4, WebM; до 50 МБ)<input name="video" type="file" accept="video/mp4,video/webm" required></label>
+<button class="btn-apply" type="submit">Сохранить</button>
+</form>
+{% endif %}
+<p id="api-message" role="status"></p>
+</div>
+{% endblock %}
