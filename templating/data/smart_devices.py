@@ -1,4 +1,8 @@
-# data/collections.py
+"""Демонстрационные данные для scripts/seed.py.
+
+Ключи медиа здесь не задаются: seed загружает файлы через MediaStorage.save,
+который генерирует новый ключ вида image/<uuid>.jpg или video/<uuid>.mp4.
+"""
 
 smart_devices = [
     {
@@ -7,8 +11,6 @@ smart_devices = [
         "title": "Xiaomi Smart Camera C500 Pro",
         "description": "Видеопоток через сеть. Трафик зависит от разрешения и режима записи.",
         "status": "published",
-        "image_key": "Xiaomi Smart Camera C500 Pro.jpg",
-        "video_key": "Xiaomi Smart Camera C500 Pro.mp4",
         "traffic_mean": 15.0,
         "traffic_variance": 4.2,
         "created_at": "2026-03-01T10:00:00",
@@ -20,8 +22,6 @@ smart_devices = [
         "title": "Roborock S8",
         "description": "Передаёт карту помещения через облако. Трафик зависит от частоты уборок.",
         "status": "published",
-        "image_key": "Roborock-S8.jpg",
-        "video_key": "Roborock-S8.mp4",
         "traffic_mean": 1.2,
         "traffic_variance": 0.35,
         "created_at": "2026-03-02T11:00:00",
@@ -33,8 +33,6 @@ smart_devices = [
         "title": "Яндекс Станция Макс",
         "description": "Стриминг аудио и голосовые команды через облако Яндекса.",
         "status": "published",
-        "image_key": "Yandex Station Max.jpg",
-        "video_key": "Yandex Station Max.mp4",
         "traffic_mean": 4.5,
         "traffic_variance": 1.1,
         "created_at": "2026-03-03T12:00:00",
@@ -46,8 +44,6 @@ smart_devices = [
         "title": "Samsung Smart TV",
         "description": "Стриминг 4K-видео, обновления приложений и Smart Hub.",
         "status": "published",
-        "image_key": "Samsung Smart TV.jpg",
-        "video_key": "Samsung Smart TV.mp4",
         "traffic_mean": 35.0,
         "traffic_variance": 12.5,
         "created_at": "2026-03-04T13:00:00",
@@ -59,8 +55,6 @@ smart_devices = [
         "title": "Aqara Motion Sensor P1",
         "description": "Минимальный трафик через Zigbee-хаб. Облачная синхронизация через Aqara Hub.",
         "status": "published",
-        "image_key": "Aqara Motion Sensor P1.jpg",
-        "video_key": "Aqara Motion Sensor P1.mp4",
         "traffic_mean": 0.55,
         "traffic_variance": 0.08,
         "created_at": "2026-03-05T14:00:00",
@@ -72,8 +66,6 @@ smart_devices = [
         "title": "Dahua / Hikvision Video Doorbell",
         "description": "Видеопоток при обнаружении движения или нажатии кнопки вызова.",
         "status": "published",
-        "image_key": "Dahua Hikvision Video Doorbell.jpg",
-        "video_key": "Dahua Hikvision Video Doorbell.mp4",
         "traffic_mean": 8.0,
         "traffic_variance": 2.4,
         "created_at": "2026-03-06T15:00:00",
@@ -85,8 +77,6 @@ smart_devices = [
         "title": "Philips Hue White Ambiance",
         "description": "Минимальный трафик через Zigbee-мост. Команды управления светом через облако Philips.",
         "status": "published",
-        "image_key": "Philips Hue White Ambiance.jpg",
-        "video_key": "Philips Hue White Ambiance.mp4",
         "traffic_mean": 0.1,
         "traffic_variance": 0.02,
         "created_at": "2026-03-10T09:00:00",
@@ -98,8 +88,6 @@ smart_devices = [
         "title": "Удалённое устройство",
         "description": "Это устройство удалено и не должно отображаться.",
         "status": "deleted",
-        "image_key": "",
-        "video_key": "",
         "traffic_mean": 2.0,
         "traffic_variance": 0.5,
         "created_at": "2026-02-01T08:00:00",
@@ -107,4 +95,3 @@ smart_devices = [
     },
 ]
 
-MINIO_BASE = "http://localhost:9000/media"

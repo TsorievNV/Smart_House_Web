@@ -11,7 +11,13 @@ class Settings(BaseSettings):
     DB_USER: str = "myuser"
     DB_PASSWORD: str = "mypassword"
     DB_NAME: str = "smart_traffic"
-    CURRENT_USER_ID: int = 1
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET: str = "media"
+    MINIO_SECURE: bool = False
+    MAX_IMAGE_BYTES: int = 10 * 1024 * 1024
+    MAX_VIDEO_BYTES: int = 50 * 1024 * 1024
 
     @property
     def DATABASE_URL(self):

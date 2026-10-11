@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "smart_devices_base.html" %}
 {% block title %}Лента — SMART TRAFFIC{% endblock %}
 
 {% block content %}
@@ -6,11 +6,11 @@
 <div class="feed-page">
     <div class="video-container">
         <video class="feed-video" autoplay muted loop playsinline controls
-               poster="{{ device.image_url or '/static/img/default.jpg' }}">
-            <source src="{{ device.video_url or '/static/video/default.mp4' }}" type="video/mp4"
+               poster="{{ media_url(device.image_key) or '/static/img/default.jpg' }}">
+            <source src="{{ media_url(device.video_key) or '/static/video/default.mp4' }}" type="video/mp4"
                     onerror="if (!this.parentElement.dataset.fallback) { this.parentElement.dataset.fallback='1'; this.src='/static/video/default.mp4'; this.parentElement.load(); }">
         </video>
-        <img src="{{ device.image_url or '/static/img/default.jpg' }}" hidden alt=""
+        <img src="{{ media_url(device.image_key) or '/static/img/default.jpg' }}" hidden alt=""
              onerror="this.onerror=null;document.querySelector('.feed-video').poster='/static/img/default.jpg'">
 
         <div class="overlay">
@@ -40,11 +40,11 @@
 
             <div class="overlay-right">
                 <div class="like-block">
-                    <div class="like-icon">♥</div>
+                    <button type="button" class="like-icon" data-like="{{ device.id }}" data-liked="{{ device.liked }}" aria-label="Лайк" aria-pressed="{{ 'true' if device.liked else 'false' }}">♥</button>
                     <span class="like-count">{{ device.likes_count }}</span>
                 </div>
 
-                <a href="/feed?id={{ device.id }}&next=true" class="btn-next" title="Следующий">
+                <a href="/smart_devices/feed?id={{ device.id }}&next=true" class="btn-next" title="Следующий">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2.2"
                         stroke-linecap="round" stroke-linejoin="round">

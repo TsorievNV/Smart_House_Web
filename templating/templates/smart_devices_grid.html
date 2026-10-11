@@ -1,13 +1,10 @@
-{% extends "base.html" %}
+{% extends "smart_devices_base.html" %}
 {% block title %}Плитка — SMART TRAFFIC{% endblock %}
 
 {% block content %}
 <div class="page grid-page">
-    <form class="filter-form" method="get" action="/grid">
+    <form class="filter-form" method="get" action="/smart_devices/grid">
         <div class="filter-card">
-            <label>ПОИСК ПО НАЗВАНИЮ
-                <input type="search" name="search" value="{{ search }}" placeholder="Название устройства">
-            </label>
             <div class="filter-header">
                 <span class="filter-label">МАТЕМАТИЧЕСКОЕ ОЖИДАНИЕ</span>
                 <span class="filter-value accent" id="mean-display">
@@ -37,9 +34,9 @@
     <div class="cards-grid">
         {% for card in cards %}
         <article class="card">
-        <a href="/feed?id={{ card.id }}" class="card-link">
+        <a href="/smart_devices/feed?id={{ card.id }}" class="card-link">
             <div class="card-img-wrap">
-                <img src="{{ card.image_url or '/static/img/default.jpg' }}" onerror="this.onerror=null;this.src='/static/img/default.jpg'" alt="{{ card.title }}">
+                <img src="{{ media_url(card.image_key) or '/static/img/default.jpg' }}" onerror="this.onerror=null;this.src='/static/img/default.jpg'" alt="{{ card.title }}">
             </div>
             <div class="card-body">
                 <div class="type-label">{{ card.type_label }}</div>
@@ -49,9 +46,7 @@
                 <div class="card-likes">♥ {{ card.likes_count }}</div>
             </div>
         </a>
-        <form method="post" action="/device/{{ card.id }}/delete" class="delete-form">
-            <button type="submit" class="btn-delete">Удалить</button>
-        </form>
+        {% if card.is_owner %}<button type="button" class="btn-apply btn-delete" data-delete="{{ card.id }}">Удалить</button>{% endif %}
         </article>
         {% else %}
         <p class="empty">Нет устройств</p>

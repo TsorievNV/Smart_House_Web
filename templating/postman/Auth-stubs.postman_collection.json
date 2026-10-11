@@ -1,0 +1,69 @@
+{
+  "info": {
+    "name": "ЛР3 — заглушки ЛР4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "device_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Аутентификация — заглушка",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/users/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пустое тело\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Деавторизация — заглушка",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/users/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пустое тело\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Разрешённый HTTP-код\", () => pm.expect([200, 201, 403, 404]).to.include(pm.response.code));"
+        ]
+      }
+    }
+  ]
+}

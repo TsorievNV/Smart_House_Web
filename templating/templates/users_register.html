@@ -1,0 +1,10 @@
+{% extends "smart_devices_base.html" %}
+{% block title %}Регистрация — SMART TRAFFIC{% endblock %}
+{% block content %}
+<div class="page add-page"><h1>Регистрация</h1>
+<form id="register-user" class="add-form">
+<label>Имя пользователя<input name="username" minlength="3" maxlength="100" required autocomplete="username"></label>
+<label>Пароль<input name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password"></label>
+<button class="btn-apply" type="submit">Зарегистрироваться</button>
+</form><p id="api-message" role="status"></p></div>
+{% endblock %}
