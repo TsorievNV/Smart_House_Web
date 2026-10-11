@@ -40,7 +40,7 @@
 
             <div class="overlay-right">
                 <div class="like-block">
-                    <button type="button" class="like-icon" data-like="{{ device.id }}" data-liked="{{ device.liked }}" aria-label="Лайк" aria-pressed="{{ 'true' if device.liked else 'false' }}">♥</button>
+                    <button type="button" class="like-icon" data-like="{{ device.id }}" data-is-liked="{{ device.is_liked }}" aria-label="Лайк" aria-pressed="{{ 'true' if device.is_liked else 'false' }}">♥</button>
                     <span class="like-count">{{ device.likes_count }}</span>
                 </div>
 

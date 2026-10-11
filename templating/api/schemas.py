@@ -22,7 +22,7 @@ class LikeInput(InputModel):
 
 class LikeOutput(BaseModel):
     device_id: int
-    liked: Literal[0, 1]
+    is_liked: Literal[0, 1]
     likes_count: int
 
 class UserInput(InputModel):
@@ -51,5 +51,6 @@ class SmartDeviceOutput(BaseModel):
     formed_at: datetime | None
     creator_id: int
     is_owner: Literal[0, 1] = 0
-    liked: Literal[0, 1] = 0
+    is_liked: Literal[0, 1] = 0
     likes_count: int = 0
+

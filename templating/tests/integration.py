@@ -16,7 +16,7 @@ from models import User, SmartDevice, Like
 DEVICE_KEYS = {
     "id", "title", "type_label", "model", "description", "image_key", "video_key",
     "traffic_mean", "traffic_variance", "created_at",
-    "formed_at", "creator_id", "is_owner", "liked", "likes_count",
+    "formed_at", "creator_id", "is_owner", "is_liked", "likes_count",
 }
 checks = 0
 async def main():
@@ -54,6 +54,8 @@ async def main():
                 body = response.json()
                 for card in body if isinstance(body, list) else [body]:
                     assert set(card) == DEVICE_KEYS, (path, set(card))
+                    assert type(card["is_liked"]) is int
+                    assert card["is_liked"] in (0, 1)
             checks += 1
             return response.json() if response.content and response.headers.get("content-type", "").startswith("application/json") else response
         schema = app.openapi()
@@ -142,7 +144,7 @@ async def main():
         await call("POST", f"/api/smart_devices/{did}/likes", 404, json={'value':1,'user_id':2})
         for value,count in [(1,1),(1,1),(0,0),(0,0),(1,1)]:
             result=await call("POST", f"/api/smart_devices/{did}/likes", json={'value':value})
-            assert result['liked']==value and result['likes_count']==count
+            assert result['is_liked']==value and result['likes_count']==count
         # Параллельные лайки сериализуются блокировками БД.
         responses=await asyncio.gather(*[client.post(f'/api/smart_devices/{did}/likes',json={'value':1}) for _ in range(4)])
         assert all(r.status_code==200 and r.json()['likes_count']==1 for r in responses)

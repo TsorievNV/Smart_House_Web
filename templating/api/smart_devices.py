@@ -52,13 +52,13 @@ async def lock_user(db, current):
 
 def smart_devices_query(current):
     likes = select(func.count(Like.id)).where(Like.device_id == SmartDevice.id).correlate(SmartDevice).scalar_subquery()
-    liked = select(Like.id).where(Like.device_id == SmartDevice.id, Like.user_id == current.id).correlate(SmartDevice).exists()
-    return select(SmartDevice, likes.label("likes_count"), liked.label("liked"))
+    is_liked = select(Like.id).where(Like.device_id == SmartDevice.id, Like.user_id == current.id).correlate(SmartDevice).exists()
+    return select(SmartDevice, likes.label("likes_count"), is_liked.label("is_liked"))
 
 def serialize(row, current):
-    device, count, liked = row
+    device, count, is_liked = row
     return SmartDeviceOutput.model_validate(device).model_copy(update={
-        "likes_count": count, "liked": int(liked), "is_owner": int(device.creator_id == current.id),
+        "likes_count": count, "is_liked": int(is_liked), "is_owner": int(device.creator_id == current.id),
     })
 
 async def read_smart_device(db, device_id, current, storage):
@@ -177,4 +177,4 @@ async def set_like(device_id: int, payload: LikeInput, db: DB, current: Current)
     await db.flush()
     count = await db.scalar(select(func.count(Like.id)).where(Like.device_id == device_id))
     await db.commit()
-    return LikeOutput(device_id=device_id, liked=payload.value, likes_count=count)
+    return LikeOutput(device_id=device_id, is_liked=payload.value, likes_count=count)

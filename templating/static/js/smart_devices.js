@@ -40,8 +40,8 @@ document.querySelectorAll('[data-publish]').forEach(button => button.addEventLis
 document.querySelectorAll('[data-like]').forEach(button => button.addEventListener('click', async () => {
     button.disabled = true;
     try {
-        const result = await api('/api/smart_devices/' + button.dataset.like + '/likes', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({value: 1 - Number(button.dataset.liked)})});
-        button.dataset.liked = String(result.liked); button.setAttribute('aria-pressed', String(Boolean(result.liked)));
+        const result = await api('/api/smart_devices/' + button.dataset.like + '/likes', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({value: 1 - Number(button.dataset.isLiked)})});
+        button.dataset.isLiked = String(result.is_liked); button.setAttribute('aria-pressed', String(Boolean(result.is_liked)));
         button.closest('.like-block').querySelector('.like-count').textContent = result.likes_count;
     } catch (error) { report(error); } finally { button.disabled = false; }
 }));
