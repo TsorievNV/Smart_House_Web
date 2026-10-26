@@ -1,6 +1,7 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
+from pydantic import Field
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,6 +19,10 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = False
     MAX_IMAGE_BYTES: int = 10 * 1024 * 1024
     MAX_VIDEO_BYTES: int = 50 * 1024 * 1024
+    REDIS_URL: str = "redis://localhost:6379/0"
+    SESSION_TTL_SECONDS: int = Field(default=86400, gt=0)
+    SESSION_COOKIE_NAME: str = "session_id"
+    SESSION_COOKIE_SECURE: bool = False
 
     @property
     def DATABASE_URL(self):

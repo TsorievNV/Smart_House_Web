@@ -3,20 +3,20 @@ from fastapi import APIRouter, Request, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from core.config import ROOT
-from api.smart_devices import DB, Current, Storage, list_smart_devices, feed, draft
+from api.smart_devices import DB, Current, OptionalCurrent, Storage, list_smart_devices, feed, draft
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=ROOT / "templates")
 
 @router.get("/smart_devices/grid")
-async def grid_page(request: Request, db: DB, current: Current, storage: Storage,
+async def grid_page(request: Request, db: DB, current: OptionalCurrent, storage: Storage,
     mean_max: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None):
     return templates.TemplateResponse(request=request, name="smart_devices_grid.html", context={
         "cards": await list_smart_devices(db, current, storage, mean_max),
         "mean_max": mean_max, "active": "grid", "media_url": storage.url})
 
 @router.get("/smart_devices/feed")
-async def feed_page(request: Request, db: DB, current: Current, storage: Storage,
+async def feed_page(request: Request, db: DB, current: OptionalCurrent, storage: Storage,
                     id: Annotated[int | None, Query(gt=0)] = None, next: bool = False):
     try:
         device = await feed(db, current, storage, id, next)

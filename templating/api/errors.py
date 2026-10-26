@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException
 logger = logging.getLogger(__name__)
 
 async def http_error(request: Request, exc: HTTPException):
-    return Response(status_code=403 if exc.status_code == 403 else 404, headers=exc.headers)
+    return Response(status_code=exc.status_code if exc.status_code in {401, 403, 503} else 404, headers=exc.headers)
 
 async def validation_error(request: Request, exc: RequestValidationError):
     return Response(status_code=404)

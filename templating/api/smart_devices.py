@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.schemas import SmartDeviceInput, SmartDeviceOutput, EmptyInput, LikeInput, LikeOutput
-from core.current_user import CurrentUser, get_current_user
+from core.current_user import CurrentUser, get_current_user, get_optional_user
 from core.storage import MediaStorage, get_storage
 from db.session import get_db
 from models import SmartDevice, Like, User
@@ -16,6 +16,7 @@ from models import SmartDevice, Like, User
 router = APIRouter(prefix="/api/smart_devices", tags=["Устройства"])
 DB = Annotated[AsyncSession, Depends(get_db)]
 Current = Annotated[CurrentUser, Depends(get_current_user)]
+OptionalCurrent = Annotated[CurrentUser, Depends(get_optional_user)]
 Storage = Annotated[MediaStorage, Depends(get_storage)]
 
 async def reject_query(request: Request):
@@ -66,16 +67,18 @@ async def read_smart_device(db, device_id, current, storage):
                             SmartDevice.status != "deleted"))).one()
     return serialize(row, current)
 
-@router.get("", response_model=list[SmartDeviceOutput])
-async def list_smart_devices(db: DB, current: Current, storage: Storage,
+@router.get("", response_model=list[SmartDeviceOutput], summary="Список опубликованных услуг",
+            description="Доступен без cookie и с неверной/истёкшей cookie. Сессия нужна только для is_owner/is_liked.")
+async def list_smart_devices(db: DB, current: OptionalCurrent, storage: Storage,
     mean_max: Annotated[float | None, Query(ge=0, allow_inf_nan=False)] = None):
     query = smart_devices_query(current).where(SmartDevice.status == "published")
     if mean_max is not None:
         query = query.where(SmartDevice.traffic_mean <= mean_max)
     return [serialize(row, current) for row in (await db.execute(query.order_by(SmartDevice.id))).all()]
 
-@router.get("/feed", response_model=SmartDeviceOutput)
-async def feed(db: DB, current: Current, storage: Storage,
+@router.get("/feed", response_model=SmartDeviceOutput, summary="Публичная лента услуг",
+            description="Возвращает опубликованное устройство; next=true выбирает следующее с переходом к началу.")
+async def feed(db: DB, current: OptionalCurrent, storage: Storage,
                id: Annotated[int | None, Query(gt=0)] = None, next: bool = False):
     if next and id is None:
         raise HTTPException(404)
@@ -93,7 +96,8 @@ async def feed(db: DB, current: Current, storage: Storage,
         raise HTTPException(404)
     return serialize(row, current)
 
-@router.get("/draft", response_model=SmartDeviceOutput, dependencies=[Depends(reject_query)])
+@router.get("/draft", response_model=SmartDeviceOutput, dependencies=[Depends(reject_query)], summary="Личный черновик",
+            description="Требует входа. Возвращает черновик текущего пользователя или 404.")
 async def draft(db: DB, current: Current, storage: Storage):
     row = (await db.execute(smart_devices_query(current).where(SmartDevice.creator_id == current.id,
                                                        SmartDevice.status == "draft"))).first()
@@ -101,7 +105,8 @@ async def draft(db: DB, current: Current, storage: Storage):
         raise HTTPException(404)
     return serialize(row, current)
 
-@router.post("", response_model=SmartDeviceOutput, status_code=201, dependencies=[Depends(reject_query)])
+@router.post("", response_model=SmartDeviceOutput, status_code=201, dependencies=[Depends(reject_query)], summary="Создать услугу",
+             description="Создаёт черновик с image/video. creator_id берётся из сессии; передавать автора запрещено. Не более одного черновика на пользователя.")
 async def create_smart_device(db: DB, current: Current, storage: Storage,
     fields: Annotated[SmartDeviceInput, Depends(smart_device_fields)],
     image: Annotated[UploadFile, File()], video: Annotated[UploadFile, File()]):
@@ -139,7 +144,8 @@ async def owned_smart_device(db, device_id, current):
         raise HTTPException(403)
     return device
 
-@router.put("/{device_id}/publication", response_model=SmartDeviceOutput, dependencies=[Depends(reject_query)])
+@router.put("/{device_id}/publication", response_model=SmartDeviceOutput, dependencies=[Depends(reject_query)], summary="Опубликовать услугу",
+            description="Только владелец заполненного черновика. Гость — 401, чужой автор/неверное состояние — 403. Устанавливает status=published и formed_at; дата публикации возвращается в JSON.")
 async def publish_smart_device(device_id: int, db: DB, current: Current, storage: Storage,
                          payload: Annotated[EmptyInput, Body()] = EmptyInput()):
     device = await owned_smart_device(db, device_id, current)
@@ -155,14 +161,16 @@ async def publish_smart_device(device_id: int, db: DB, current: Current, storage
     await db.commit()
     return result
 
-@router.delete("/{device_id}", status_code=200, response_class=Response, dependencies=[Depends(reject_query), Depends(reject_body)])
+@router.delete("/{device_id}", status_code=200, response_class=Response, dependencies=[Depends(reject_query), Depends(reject_body)], summary="Удалить свою услугу",
+               description="Требует сессии владельца. Логически удаляет запись, устанавливая completed_at.")
 async def delete_smart_device(device_id: int, db: DB, current: Current):
     device = await owned_smart_device(db, device_id, current)
     device.status, device.completed_at = "deleted", datetime.utcnow()
     await db.commit()
     return Response(status_code=200)
 
-@router.post("/{device_id}/likes", response_model=LikeOutput, dependencies=[Depends(reject_query)])
+@router.post("/{device_id}/likes", response_model=LikeOutput, dependencies=[Depends(reject_query)], summary="Установить или снять лайк",
+             description="Требует входа. value=1 ставит лайк, value=0 снимает; пользователь определяется сессией.")
 async def set_like(device_id: int, payload: LikeInput, db: DB, current: Current):
     await lock_user(db, current)
     device = await db.scalar(select(SmartDevice).where(SmartDevice.id == device_id,

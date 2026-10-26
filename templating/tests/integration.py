@@ -8,7 +8,8 @@ from sqlalchemy.exc import IntegrityError
 import httpx
 from main import app
 from core.config import ROOT, settings
-from core.current_user import get_current_user
+from core.current_user import get_sessions
+from api.users import hash_password
 from core.storage import get_storage
 from db.session import async_session_maker, engine
 from models import User, SmartDevice, Like
@@ -27,16 +28,15 @@ async def main():
     assert not list(storage.client.list_objects(settings.MINIO_BUCKET)) if storage.client.bucket_exists(settings.MINIO_BUCKET) else True
     async with async_session_maker() as db:
         assert await db.scalar(select(func.count(User.id))) == 0, "Test database must be empty"
-        db.add_all([User(username="creator"), User(username="other")])
+        db.add_all([User(username="creator", password_hash=hash_password("Test password 123")), User(username="other")])
         await db.flush()
-        assert await db.get(User, get_current_user().id) is not None
+        assert await db.get(User, 1) is not None
         own = SmartDevice(title="Xiaomi Existing", description="first", status="published", creator_id=1, traffic_mean=15, traffic_variance=2)
         foreign = SmartDevice(title="Other published", description="second", status="published", creator_id=2, traffic_mean=1, traffic_variance=0.1)
         hidden = SmartDevice(title="Hidden draft", description="hidden", status="draft", creator_id=2)
         deleted = SmartDevice(title="Deleted", description="deleted", status="deleted", creator_id=1)
         db.add_all([own, foreign, hidden, deleted]); await db.commit()
         oid, fid, hid, xid = own.id, foreign.id, hidden.id, deleted.id
-    assert get_current_user() is get_current_user()
     image = (ROOT / "static/img/default.jpg").read_bytes()
     video = (ROOT / "static/video/default.mp4").read_bytes()
     data = dict(title="Postman test", description="Description", model="T3", type_label="Camera", traffic_mean="8.5", traffic_variance="1.2")
@@ -46,7 +46,7 @@ async def main():
         async def call(method, path, status=200, **kw):
             global checks
             response = await client.request(method, path, **kw)
-            assert response.status_code in {200, 201, 403, 404}
+            assert response.status_code in {200, 201, 401, 403, 404, 503}
             assert response.status_code == status, (method, path, response.status_code, response.text)
             if status >= 400:
                 assert response.content == b"", (path, response.text)
@@ -58,13 +58,14 @@ async def main():
                     assert card["is_liked"] in (0, 1)
             checks += 1
             return response.json() if response.content and response.headers.get("content-type", "").startswith("application/json") else response
+        await call("POST", "/api/users/login", json={"username": "creator", "password": "Test password 123"})
         schema = app.openapi()
         assert "status" not in schema["components"]["schemas"]["SmartDeviceOutput"]["properties"]
         assert "content" not in schema["paths"]["/api/smart_devices"]["post"]["responses"]["404"]
         assert sum(len(v) for k,v in schema["paths"].items() if k.startswith('/api')) == 10
         for path in schema["paths"].values():
             for operation in path.values():
-                assert set(operation["responses"]) <= {"200", "201", "403", "404"}
+                assert set(operation["responses"]) <= {"200", "201", "401", "403", "404", "503"}
         await call("GET", "/api/smart_devices/", 404)
         assert "search" not in {p["name"] for p in schema["paths"]["/api/smart_devices"]["get"].get("parameters", [])}
         assert "image_url" not in SmartDevice.__table__.columns
@@ -180,10 +181,11 @@ async def main():
             try: await db.commit()
             except IntegrityError: await db.rollback()
             else: raise AssertionError('Draft index missing')
-        await call('POST','/api/users/login',200)
+        await call('POST','/api/users/login',200,json={"username": "creator", "password": "Test password 123"})
         await call('POST','/api/users/logout',200)
+    await get_sessions().aclose()
     await engine.dispose()
-    print(f'PASS: {checks} HTTP checks + fixed card keys/nulls + empty error bodies + PostgreSQL/MinIO + four pages')
+    print(f'PASS: {checks} HTTP checks + session auth + card keys/nulls + empty error bodies + PostgreSQL/MinIO + four pages')
 
 if __name__=='__main__':
     asyncio.run(main())
